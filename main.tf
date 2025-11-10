@@ -62,7 +62,7 @@ resource "btp_subaccount_subscription" "print-app" {
 # CLOUD FOUNDRY SERVICES
 # -------------------
 data "cloudfoundry_service_plan" "print-sender" {
-  depends_on            = [btp_subaccount_entitlement.print-server]
+  depends_on            = [btp_subaccount_entitlement.print-sender]
   name                  = "sender"
   service_offering_name = "print"
 }
@@ -81,7 +81,7 @@ resource "cloudfoundry_service_credential_binding" "print-sender-key" {
 }
 
 data "cloudfoundry_service_plan" "print-receiver" {
-  depends_on            = [btp_subaccount_entitlement.print-server]
+  depends_on            = [btp_subaccount_entitlement.print-receiver]
   name                  = "receiver"
   service_offering_name = "print"
 }
@@ -103,11 +103,11 @@ resource "cloudfoundry_service_credential_binding" "print-receiver-key" {
 # OUTPUT
 # -------------------
 output "sender-service-key" {
-  value     = cloudfoundry_service_credential_binding.print-server-key
+  value     = cloudfoundry_service_credential_binding.print-sender-key
   sensitive = true
 }
 
 output "receiver-service-key" {
-  value     = cloudfoundry_service_credential_binding.print-server-key
+  value     = cloudfoundry_service_credential_binding.print-receiver-key
   sensitive = true
 }

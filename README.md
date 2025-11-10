@@ -62,9 +62,8 @@ provider "cloudfoundry" {
 module "print_server" {
   source = "git::https://github.com/RegestaItalia/regesta.devops.terraform.modules.btp-print-server-creation.git?ref=main"
 
-  subaccountid       = "your_subaccount_id"
-  spaceid            = "your_space_id"
-  print-server-plan  = "default" # oppure altro piano disponibile
+  subaccountid = "your_subaccount_id"
+  spaceid      = "your_space_id"
 }
 ```
 
@@ -73,20 +72,21 @@ module "print_server" {
 
 - **subaccountid** (string): ID del subaccount BTP.
 - **spaceid** (string): ID dello space Cloud Foundry.
-- **print-server-plan** (string, default: "default"): Piano da utilizzare per il servizio Print Server.
 
 
 
 
 ## Output
 
-- **service-key**: Oggetto della chiave di servizio generata per Print Server. Contiene le credenziali necessarie per accedere al servizio.
+- **sender-service-key**: Oggetto della chiave di servizio generata per Print Sender. Contiene le credenziali necessarie per accedere al servizio di invio.
+- **receiver-service-key**: Oggetto della chiave di servizio generata per Print Receiver. Contiene le credenziali necessarie per accedere al servizio di ricezione.
 
 
 ## Risorse create
 
-- **Entitlements** per il servizio: `print-server`
-- **Istanza gestita** di servizio Cloud Foundry per `print-server`
-- **Service key** per `print-server` (usata per ottenere le credenziali)
+- **Entitlements** per i servizi: `print-app` (piano standard), `print` con piani `receiver` e `sender`
+- **Subscription** per `print-app` con piano `standard`
+- **Istanze gestite** di servizio Cloud Foundry per `print` con piani `sender` e `receiver`
+- **Service keys** per `print-sender` e `print-receiver` (usate per ottenere le credenziali)
 
 ````
