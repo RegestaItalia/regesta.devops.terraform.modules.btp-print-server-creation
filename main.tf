@@ -22,11 +22,6 @@ variable "spaceid" {
   type = string
 }
 
-variable "print-server-plan" {
-  type    = string
-  default = "default"
-}
-
 # -------------------
 # DATA SOURCE
 # -------------------
@@ -37,38 +32,82 @@ data "btp_subaccount" "current" {
 # -------------------
 # ENTITLEMENTS & SUBSCRIPTION
 # -------------------
-resource "btp_subaccount_entitlement" "print-server" {
+resource "btp_subaccount_entitlement" "print-app" {
   subaccount_id = var.subaccountid
-  service_name  = "print-server"
-  plan_name     = var.print-server-plan
+  service_name  = "print-app"
+  plan_name     = "standard"
+}
+resource "btp_subaccount_entitlement" "print-receiver" {
+  subaccount_id = var.subaccountid
+  service_name  = "print"
+  plan_name     = "receiver"
+}
+resource "btp_subaccount_entitlement" "print-sender" {
+  subaccount_id = var.subaccountid
+  service_name  = "print"
+  plan_name     = "sender"
+}
+
+# -------------------
+# PRINT SERVER UI INTEGRATION
+# -------------------
+resource "btp_subaccount_subscription" "print-app" {
+  depends_on    = [btp_subaccount_entitlement.print-app]
+  subaccount_id = var.subaccountid
+  app_name      = "print-app"
+  plan_name     = "standard"
 }
 
 # -------------------
 # CLOUD FOUNDRY SERVICES
 # -------------------
-data "cloudfoundry_service_plan" "print-server" {
+data "cloudfoundry_service_plan" "print-sender" {
   depends_on            = [btp_subaccount_entitlement.print-server]
-  name                  = var.print-server-plan
-  service_offering_name = "print-server"
+  name                  = "sender"
+  service_offering_name = "print"
 }
 
-resource "cloudfoundry_service_instance" "print-server" {
-  name         = "print-server"
+resource "cloudfoundry_service_instance" "print-sender" {
+  name         = "print"
   type         = "managed"
   space        = var.spaceid
-  service_plan = data.cloudfoundry_service_plan.print-server.id
+  service_plan = data.cloudfoundry_service_plan.print-sender.id
 }
 
-resource "cloudfoundry_service_credential_binding" "print-server-key" {
+resource "cloudfoundry_service_credential_binding" "print-sender-key" {
   type             = "key"
-  name             = "print-server-key"
-  service_instance = cloudfoundry_service_instance.print-server.id
+  name             = "print-sender-key"
+  service_instance = cloudfoundry_service_instance.print-sender.id
+}
+
+data "cloudfoundry_service_plan" "print-receiver" {
+  depends_on            = [btp_subaccount_entitlement.print-server]
+  name                  = "receiver"
+  service_offering_name = "print"
+}
+
+resource "cloudfoundry_service_instance" "print-receiver" {
+  name         = "print"
+  type         = "managed"
+  space        = var.spaceid
+  service_plan = data.cloudfoundry_service_plan.print-receiver.id
+}
+
+resource "cloudfoundry_service_credential_binding" "print-receiver-key" {
+  type             = "key"
+  name             = "print-receiver-key"
+  service_instance = cloudfoundry_service_instance.print-receiver.id
 }
 
 # -------------------
 # OUTPUT
 # -------------------
-output "service-key" {
+output "sender-service-key" {
+  value     = cloudfoundry_service_credential_binding.print-server-key
+  sensitive = true
+}
+
+output "receiver-service-key" {
   value     = cloudfoundry_service_credential_binding.print-server-key
   sensitive = true
 }
