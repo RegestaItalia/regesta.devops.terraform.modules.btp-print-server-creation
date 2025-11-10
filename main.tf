@@ -68,7 +68,7 @@ data "cloudfoundry_service_plan" "print-sender" {
 }
 
 resource "cloudfoundry_service_instance" "print-sender" {
-  name         = "print-sender"
+  name         = "print_snd"
   type         = "managed"
   space        = var.spaceid
   service_plan = data.cloudfoundry_service_plan.print-sender.id
@@ -87,7 +87,7 @@ data "cloudfoundry_service_plan" "print-receiver" {
 }
 
 resource "cloudfoundry_service_instance" "print-receiver" {
-  name         = "print-receiver"
+  name         = "print_rcv"
   type         = "managed"
   space        = var.spaceid
   service_plan = data.cloudfoundry_service_plan.print-receiver.id
